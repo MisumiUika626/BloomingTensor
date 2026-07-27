@@ -79,6 +79,20 @@ python3 -m src.main
 
 `-m` 表示运行模块。直接执行 `python3 src/main.py` 时，Python 会把它当作独立脚本，无法确定 `.` 所代表的包。
 
+两种启动方式的区别：
+
+```text
+python3 src/main.py   → 把 main.py 当作独立文件，__package__ 为空
+python3 -m src.main   → 把 main.py 当作 src 包内模块，__package__ 为 "src"
+```
+
+工程代码优先使用 `python3 -m src.main`。如果入口需要兼容 IDE 的“运行当前文件”，可以根据
+`__package__` 是否为空选择包内相对导入或直接导入。
+
+涉及 `from src...` 的命令应在项目根目录 `workspace/ai` 执行。若当前位于
+`workspace/ai/src`，Python 会错误地寻找 `workspace/ai/src/src`，从而出现
+`ModuleNotFoundError: No module named 'src'`。
+
 ## 为什么 SGD 的 Loss 不一定单调下降
 
 对单个样本，平方损失是：
@@ -98,3 +112,14 @@ L1(更新前参数) + L2(第一次更新后参数) + L3(第二次更新后参数
 它不是同一组参数上的严格平均损失。正确评估方式是：一个 epoch 更新结束后固定参数，再对全部样本做一次只前向、不更新的计算。
 
 结论：SGD 允许震荡，应观察较长时间的整体下降趋势；Batch Gradient Descent 使用全部样本的平均梯度，在学习率合适时更容易得到单调下降曲线。
+
+## `lambda` 匿名函数
+
+`lambda` 是 Python 关键字，不需要导入。它用于定义简短的匿名函数：
+
+```python
+do_nothing = lambda: None
+```
+
+这表示函数没有参数，调用后返回 `None`。常见错误是误拼为 `lamda`。较复杂逻辑应使用普通的
+`def` 函数。
