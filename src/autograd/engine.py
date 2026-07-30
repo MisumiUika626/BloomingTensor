@@ -64,10 +64,16 @@ class Value:
         return self*other 
     def __rsub__(self,other):
         return other+(-self)
+    def __truediv__(self, other): # self / other
+        return self * other**-1
+    def __rtruediv__(self, other): # other / self
+        return other * self**-1
+    
     def backward(self):
         topo=[]
         visited=set()
         def build_topo(v):
+            #拓扑排序建立计算图
             if v not in visited:
                 visited.add(v)
                 for child in v._prev:
@@ -77,16 +83,6 @@ class Value:
         self.grad = 1.0
         for node in reversed(topo):
             node._backward()
-a = Value(2.0)
-b = Value(3.0)
-c = a + b
-L = c * a
-L.backward()
-
-print(c.data)
-print(c.grad)
-print(a.grad)
-print(b.grad)
               
               
               
