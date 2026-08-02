@@ -1,0 +1,153 @@
+import numpy as np
+
+
+class Tensor:
+    def __init__(self, data, _children=(), _op=""):
+        self.data = np.asarray(data, dtype=np.float64)
+        self.grad = np.zeros_like(self.data)
+        self._prev = set(_children)
+        self._backward = lambda: None
+        self._op = _op
+
+    def _unbroadcast_grad(self, grad, target_shape):
+        if grad.shape == target_shape:
+            return grad
+        while grad.ndim > len(target_shape):
+            grad = np.sum(grad, axis=0)
+        for i, dim in enumerate(target_shape):
+            if dim == 1 and grad.shape[i] != 1:
+                grad = np.sum(grad, axis=i, keepdims=True)
+        return grad
+
+    def __add__(self, other):
+        if not isinstance(other, Tensor):
+            other = Tensor(other)
+        out = Tensor(self.data + other.data, (self, other), "+")
+
+        def _backward():
+            self.grad += self._unbroadcast_grad(out.grad, self.data.shape)
+            other.grad += self._unbroadcast_grad(out.grad, other.data.shape)
+
+        out._backward = _backward
+        return out
+
+    def __radd__(self, other):
+        return self + other
+
+    def __neg__(self):
+        out = Tensor(-self.data, (self,), "-")
+
+        def _backward():
+            self.grad += -out.grad
+
+        out._backward = _backward
+        return out
+
+    def __sub__(self, other):
+        if not isinstance(other, Tensor):
+            other = Tensor(other)
+        return self + (-other)
+
+    def __rsub__(self, other):
+        return (-self) + other
+
+    def __mul__(self, other):
+        if not isinstance(other, Tensor):
+            other = Tensor(other)
+        out = Tensor(self.data * other.data, (self, other), "*")
+
+        def _backward():
+            self.grad += self._unbroadcast_grad(out.grad * other.data, self.data.shape)
+            other.grad += self._unbroadcast_grad(out.grad * self.data, other.data.shape)
+
+        out._backward = _backward
+        return out
+
+    # only 2d matrix supported
+    def __matmul__(self, other):
+        if not isinstance(other, Tensor):
+            other = Tensor(other)
+        if not self.data.ndim == 2 or not other.data.ndim == 2:
+            raise ValueError("Both tensors must be 2D for matrix multiplication")
+        out = Tensor(self.data @ other.data, (self, other), "@")
+
+        def _backward():
+            self.grad += out.grad @ other.data.T
+            other.grad += self.data.T @ out.grad
+
+        out._backward = _backward
+        return out
+
+    def __rmul__(self, other):
+        return self * other
+
+    def __pow__(self, exponent):
+        if not isinstance(exponent, (int, float)):
+            raise TypeError("exponent must be an int or float")
+        out = Tensor(self.data**exponent, (self,), f"**{exponent}")
+
+        def _backward():
+            self.grad += exponent * self.data ** (exponent - 1) * out.grad
+
+        out._backward = _backward
+        return out
+
+    def __truediv__(self, other):
+        if not isinstance(other, Tensor):
+            other = Tensor(other)
+        return self * other**-1
+
+    def __rtruediv__(self, other):
+        if not isinstance(other, Tensor):
+            other = Tensor(other)
+        return other * self**-1
+
+    def sum(self):
+        out = Tensor(np.sum(self.data), (self,), "sum")
+
+        def _backward():
+            self.grad += out.grad * np.ones_like(self.data)
+
+        out._backward = _backward
+        return out
+
+    def relu(self):
+        out = Tensor(np.maximum(0, self.data), (self,), "relu")
+
+        def _backward():
+            self.grad += out.grad * (self.data > 0)
+
+        out._backward = _backward
+        return out
+
+    def backward(self):
+        if self.data.shape != ():
+            raise RuntimeError("backward() can only be called on a scalar Tensor")
+        topo = []
+        visited = set()
+
+        def build_topo(v):
+            if v not in visited:
+                visited.add(v)
+                for child in v._prev:
+                    build_topo(child)
+                topo.append(v)
+
+        build_topo(self)
+        for node in topo:
+            node.grad = np.zeros_like(node.data)
+        self.grad = np.ones_like(self.data)
+        for node in reversed(topo):
+            node._backward()
+
+    def mean(self):
+        out = Tensor(np.mean(self.data), (self,), "mean")
+
+        def _backward():
+            self.grad += out.grad * np.ones_like(self.data) / self.data.size
+
+        out._backward = _backward
+        return out
+
+    def __repr__(self):
+        return f"Tensor(data={self.data}, shape={self.data.shape})"
