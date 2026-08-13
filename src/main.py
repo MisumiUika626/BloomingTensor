@@ -1,49 +1,72 @@
-if __package__:
-    from .trainers.trainer import Trainer
-    from .optimizers.sgd import SGD
-    from .models.linear import Linear
-    from .datasets.dataset import Dataset
-    from .config import INPUT_DIM, LEARNING_RATE, EPOCHS
-else:
-    # 兼容 `python3 src/main.py` 和 IDE 的“运行当前文件”。
-    from trainers.trainer import Trainer
-    from optimizers.sgd import SGD
-    from models.linear import Linear
-    from datasets.dataset import Dataset
-    from config import INPUT_DIM, LEARNING_RATE, EPOCHS
+from .autograd.tensor import Tensor
+from .config import EPOCHS, INPUT_DIM, LEARNING_RATE, OUTPUT_DIM
+from .datasets.dataset import Dataset
+from .nn.linear import Linear
+from .optimizers.sgd import SGD
+from .trainers.trainer import Trainer
 
 
 def main():
     dataset = Dataset()
-    model = Linear(INPUT_DIM)
+    model = Linear(INPUT_DIM, OUTPUT_DIM)
     trainer = Trainer(model)
     optimizer = SGD(model, LEARNING_RATE)
 
     for epoch in range(EPOCHS):
+        # 训练
         for index in range(len(dataset)):
-            x, target = dataset[index]
-            prediction = model.forward(x)
-            gradients = trainer.compute_gradient(
-                x,
-                prediction,
-                target
-            )
-            optimizer.step(gradients)
+            optimizer.zero_grad()
 
-        # 固定本轮训练后的参数，再评估整个数据集。
-        total_loss = 0
+            x, target = dataset[index]
+            x_tensor = Tensor([x])
+            target_tensor = Tensor([[target]])
+
+            prediction = model.forward(x_tensor)
+            loss = trainer.compute_loss(
+                prediction,
+                target_tensor,
+            ).mean()
+
+            loss.backward()
+            optimizer.step()
+
+        # 评估：只计算 loss，不反向传播、不更新参数
+        total_loss = 0.0
+
         for index in range(len(dataset)):
             x, target = dataset[index]
-            prediction = model.forward(x)
-            total_loss += trainer.compute_loss(
+            x_tensor = Tensor([x])
+            target_tensor = Tensor([[target]])
+
+            prediction = model.forward(x_tensor)
+            sample_loss = trainer.compute_loss(
                 prediction,
-                target
-            )
+                target_tensor,
+            ).mean()
+
+            total_loss += float(sample_loss.data)
 
         average_loss = total_loss / len(dataset)
+        print(f"Epoch {epoch + 1}, Loss: {average_loss}")
+
+    print("Final parameters:")
+
+    for parameter in model.parameters():
+        print(parameter.data)
+
+    for index in range(len(dataset)):
+        x, target = dataset[index]
+        x_tensor = Tensor([x])
+
+        prediction = model.forward(x_tensor)
+
         print(
-            f"Epoch {epoch + 1}, "
-            f"Loss: {average_loss}"
+            "input:",
+            x,
+            "prediction:",
+            prediction.data.item(),
+            "target:",
+            target,
         )
 
 
