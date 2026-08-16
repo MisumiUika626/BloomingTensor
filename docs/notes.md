@@ -1,4 +1,11 @@
-# Python 工程笔记
+# Engineering Notes
+
+- 只记录可复用、容易遗忘或反复混淆的知识。
+- 内容按实际开发过程增长。
+- 保持简洁，方便查阅。
+- 不记录一次性环境错误、重复内容或完整教程。
+
+## Python 工程笔记
 
 ## 鸭子类型（Duck Typing）
 
@@ -123,3 +130,17 @@ do_nothing = lambda: None
 
 这表示函数没有参数，调用后返回 `None`。常见错误是误拼为 `lamda`。较复杂逻辑应使用普通的
 `def` 函数。
+
+## `git add` 与暂存区
+
+`git add` 不只是添加新文件，也用于暂存已有文件的修改。标准流程是：
+
+```bash
+git status
+git add path/to/file
+git commit -m "说明改动"
+git push
+```
+
+`git add -u` 暂存所有已跟踪文件的修改和删除；`git add -A` 还会包含新文件。学习阶段优先明确
+写出文件路径，避免误提交无关内容。
