@@ -9,8 +9,8 @@ from .trainers.trainer import Trainer
 def main():
     dataset = Dataset()
     model = Linear(INPUT_DIM, OUTPUT_DIM)
-    trainer = Trainer(model)
-    optimizer = SGD(model, LEARNING_RATE)
+    trainer = Trainer()
+    optimizer = SGD(model.parameters(), LEARNING_RATE)
 
     for epoch in range(EPOCHS):
         # 训练
@@ -25,7 +25,7 @@ def main():
             loss = trainer.compute_loss(
                 prediction,
                 target_tensor,
-            ).mean()
+            )
 
             loss.backward()
             optimizer.step()
