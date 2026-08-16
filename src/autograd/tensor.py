@@ -120,6 +120,21 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def leaky_relu(self, alpha=0.01):
+        if not isinstance(alpha, (int, float)) or isinstance(alpha, bool):
+            raise TypeError("alpha must be an int or float")
+        if not 0 < alpha < 1:
+            raise ValueError("alpha must satisfy 0 <= alpha < 1")
+        out = Tensor(
+            np.where(self.data > 0, self.data, alpha * self.data), (self,), "leaky_relu"
+        )
+
+        def _backward():
+            self.grad += out.grad * np.where(self.data > 0, 1, alpha)
+
+        out._backward = _backward
+        return out
+
     def backward(self):
         if self.data.shape != ():
             raise RuntimeError("backward() can only be called on a scalar Tensor")

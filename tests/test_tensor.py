@@ -102,6 +102,33 @@ class TestTensorAutograd(unittest.TestCase):
         )
         np.testing.assert_allclose(scale.grad, [5.0, 7.0, 9.0])
 
+    def test_leaky_relu(self):
+        x = Tensor([-2.0, 0.0, 3.0])
+        alpha = 0.01
+        out = x.leaky_relu(alpha)
+        loss = out.sum()
+        loss.backward()
+        np.testing.assert_allclose(out.data, [-0.02, 0.0, 3.0])
+        np.testing.assert_allclose(x.grad, [alpha, alpha, 1.0])
+
+    def test_invalid_alpha_leaky_relu(self):
+        x = Tensor([-2.0, 0.0, 3.0])
+
+        with self.assertRaises(ValueError):
+            x.leaky_relu(-0.01)
+
+        with self.assertRaises(ValueError):
+            x.leaky_relu(0.0)
+
+        with self.assertRaises(ValueError):
+            x.leaky_relu(1.0)
+
+        with self.assertRaises(TypeError):
+            x.leaky_relu(True)
+
+        with self.assertRaises(ValueError):
+            x.leaky_relu(1.5)
+
 
 if __name__ == "__main__":
     unittest.main()
