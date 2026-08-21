@@ -1,17 +1,30 @@
+import matplotlib.pyplot as plt
+import numpy as np
+
 from .autograd.tensor import Tensor
-from .config import EPOCHS, INPUT_DIM, LEARNING_RATE, OUTPUT_DIM
-from .datasets.dataset import Dataset
-from .nn.linear import Linear
+from .config_twomoon import (
+    EPOCHS,
+    HIDDEN_DIMS,
+    INPUT_DIM,
+    LEARNING_RATE,
+    OUTPUT_DIM,
+    RANDOM_SEED,
+)
+from .datasets.dataset_twomoon import Dataset
+from .models.mlp import MLP
 from .optimizers.sgd import SGD
 from .trainers.trainer import Trainer
+from .visualization import plot_binary_decision_region
 
 
 def main():
+    np.random.seed(RANDOM_SEED)
     dataset = Dataset()
-    model = Linear(INPUT_DIM, OUTPUT_DIM)
+    layer_sizes = [INPUT_DIM] + HIDDEN_DIMS + [OUTPUT_DIM]
+    model = MLP(layer_sizes)
     trainer = Trainer()
     optimizer = SGD(model.parameters(), LEARNING_RATE)
-
+    loss_history = []
     for epoch in range(EPOCHS):
         # 训练
         for index in range(len(dataset)):
@@ -47,7 +60,25 @@ def main():
             total_loss += float(sample_loss.data)
 
         average_loss = total_loss / len(dataset)
+        loss_history.append(average_loss)
         print(f"Epoch {epoch + 1}, Loss: {average_loss}")
+
+    epochs = range(1, len(loss_history) + 1)
+
+    plt.plot(epochs, loss_history)
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Training Loss")
+    plt.yscale("log")
+    plt.savefig("loss_curve_twomoon.png")
+    plt.close()
+
+    plot_binary_decision_region(
+        model,
+        dataset,
+        "twomoon_decision_region.png",
+        "Two Moons Decision Region",
+    )
 
     print("Final parameters:")
 
