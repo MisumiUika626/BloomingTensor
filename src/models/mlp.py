@@ -18,3 +18,6 @@ class MLP:
 
     def forward(self, x):
         return self.network.forward(x)
+
+    def parameters(self):
+        return self.network.parameters()
