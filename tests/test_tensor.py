@@ -102,6 +102,30 @@ class TestTensorAutograd(unittest.TestCase):
         )
         np.testing.assert_allclose(scale.grad, [5.0, 7.0, 9.0])
 
+    def test_exp(self):
+        x = Tensor([0, 1, -1])
+        out = x.exp()
+        loss = (3 * out).sum()
+        loss.backward()
+        np.testing.assert_allclose(out.data, np.exp([0, 1, -1]))
+        np.testing.assert_allclose(x.grad, 3 * np.exp([0, 1, -1]))
+
+    def test_log_forward_and_backward(self):
+        x = Tensor([1.0, np.e, np.e**2])
+        out = x.log()
+        loss = (4 * out).sum()
+
+        loss.backward()
+
+        np.testing.assert_allclose(out.data, [0.0, 1.0, 2.0])
+        np.testing.assert_allclose(x.grad, 4 / x.data)
+
+    def test_log_rejects_non_positive_values(self):
+        for values in ([1.0, 0.0], [1.0, -1.0]):
+            with self.subTest(values=values):
+                with self.assertRaisesRegex(ValueError, "positive"):
+                    Tensor(values).log()
+
     def test_leaky_relu(self):
         x = Tensor([-2.0, 0.0, 3.0])
         alpha = 0.01

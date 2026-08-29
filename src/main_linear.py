@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from .autograd.tensor import Tensor
-from .config import (
+from .configs.config import (
     EPOCHS,
     INPUT_DIM,
     LEARNING_RATE,

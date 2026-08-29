@@ -17,3 +17,9 @@ class LeakyReLU:
 # activation = LeakyReLU(alpha=0.1)
 # out = activation.forward(x)
 # 这一句就是前向传播中的激活过程，之前我们直接把矩阵的输出结果当成传入的张量了，这次我们把中间的激活过程加上了，相当于就是第m层激活值经过Linear的计算之后再过一遍激活函数然后就变成下一层神经元的激活值，对应到代码就是 activation建立一个LeakyReLU类，然后输出的值就是对Tensorx来一个前向传播（就是让x过一遍这个函数）这个函数就是Tensor类的成员函数leaky_relu，然后就处理数据，最后输出新的矩阵
+class Sigmoid:
+    def forward(self, x):
+        if not isinstance(x, Tensor):
+            raise TypeError("x must be a Tensor")
+        out = 1 / ((-x).exp() + 1)
+        return out

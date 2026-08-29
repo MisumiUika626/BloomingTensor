@@ -78,6 +78,26 @@ class Tensor:
         out._backward = _backward
         return out
 
+    def exp(self):
+        out = Tensor(np.exp(self.data), (self,), "exp")
+
+        def _backward():
+            self.grad += np.exp(self.data) * out.grad
+
+        out._backward = _backward
+        return out
+
+    def log(self):
+        if np.any(self.data <= 0):
+            raise ValueError("log is only defined for positive values")
+        out = Tensor(np.log(self.data), (self,), "log")
+
+        def _backward():
+            self.grad += 1 / self.data * out.grad
+
+        out._backward = _backward
+        return out
+
     def __rmul__(self, other):
         return self * other
 

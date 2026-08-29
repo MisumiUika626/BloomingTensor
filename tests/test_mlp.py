@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from src.autograd.tensor import Tensor
-from src.config import (
+from src.configs.config import (
     RANDOM_SEED,
 )
 from src.models.mlp import MLP

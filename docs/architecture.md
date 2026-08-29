@@ -12,13 +12,14 @@
 src/
 ├── agent/          # Agent experiments (currently a placeholder)
 ├── autograd/       # Scalar and Tensor automatic differentiation
+├── configs/        # Per-experiment training configuration
 ├── datasets/       # Training data access
+├── experiments.py  # Named experiment assembly
 ├── models/         # Learnable models such as Linear
 ├── nn/             # Neural-network components (currently a placeholder)
 ├── optimizers/     # Parameter update rules such as SGD
 ├── trainers/       # Loss and training responsibilities
-├── config.py       # Small training configuration
-└── main.py         # Current training entry point
+└── main.py         # Command-line experiment entry point
 
 tests/              # Autograd, model, and trainer tests
 ```
@@ -26,8 +27,15 @@ tests/              # Autograd, model, and trainer tests
 The current data flow is:
 
 ```text
+Experiment name → Experiment assembly → Trainer
+                                      ↓
 Dataset → Model forward → Loss → Backward → Gradients → Optimizer update
 ```
+
+`build_experiment(name)` creates the dataset, model, optimizer, training
+configuration, and output filename for `linear`, `nonlinear`, `xor`, or
+`twomoon`. `Trainer` receives the training objects through their shared
+interfaces and does not branch on the experiment name.
 
 ## Evolution Policy
 

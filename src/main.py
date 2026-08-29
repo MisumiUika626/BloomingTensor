@@ -1,84 +1,68 @@
-import matplotlib.pyplot as plt
-import numpy as np
+import argparse
+from pathlib import Path
 
 from .autograd.tensor import Tensor
-from .config_twomoon import (
-    EPOCHS,
-    HIDDEN_DIMS,
-    INPUT_DIM,
-    LEARNING_RATE,
-    OUTPUT_DIM,
-    RANDOM_SEED,
-)
-from .datasets.dataset_twomoon import Dataset
-from .models.mlp import MLP
-from .optimizers.sgd import SGD
+from .experiments import build_experiment
 from .trainers.trainer import Trainer
-from .visualization import plot_binary_decision_region
 
 
 def main():
-    np.random.seed(RANDOM_SEED)
-    dataset = Dataset()
-    layer_sizes = [INPUT_DIM] + HIDDEN_DIMS + [OUTPUT_DIM]
-    model = MLP(layer_sizes)
+    parser = argparse.ArgumentParser(description="Run a Growing-AI experiment")
+    parser.add_argument(
+        "--dataset",
+        choices=("linear", "nonlinear", "xor", "twomoon"),
+        default="twomoon",
+    )
+    parser.add_argument(
+        "--model",
+        choices=("linear", "mlp"),
+        default="mlp",
+    )
+    args = parser.parse_args()
+
+    import matplotlib.pyplot as plt
+
+    experiment = build_experiment(args.dataset, args.model)
+
+    dataset = experiment["dataset"]
+    model = experiment["model"]
+    optimizer = experiment["optimizer"]
+    epochs = experiment["epochs"]
+
     trainer = Trainer()
-    optimizer = SGD(model.parameters(), LEARNING_RATE)
-    loss_history = []
-    for epoch in range(EPOCHS):
-        # 训练
-        for index in range(len(dataset)):
-            optimizer.zero_grad()
 
-            x, target = dataset[index]
-            x_tensor = Tensor([x])
-            target_tensor = Tensor([[target]])
-
-            prediction = model.forward(x_tensor)
-            loss = trainer.compute_loss(
-                prediction,
-                target_tensor,
-            )
-
-            loss.backward()
-            optimizer.step()
-
-        # 评估：只计算 loss，不反向传播、不更新参数
-        total_loss = 0.0
-
-        for index in range(len(dataset)):
-            x, target = dataset[index]
-            x_tensor = Tensor([x])
-            target_tensor = Tensor([[target]])
-
-            prediction = model.forward(x_tensor)
-            sample_loss = trainer.compute_loss(
-                prediction,
-                target_tensor,
-            ).mean()
-
-            total_loss += float(sample_loss.data)
-
-        average_loss = total_loss / len(dataset)
-        loss_history.append(average_loss)
-        print(f"Epoch {epoch + 1}, Loss: {average_loss}")
-
-    epochs = range(1, len(loss_history) + 1)
-
-    plt.plot(epochs, loss_history)
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.title("Training Loss")
-    plt.yscale("log")
-    plt.savefig("loss_curve_twomoon.png")
-    plt.close()
-
-    plot_binary_decision_region(
+    loss_history = trainer.fit(
         model,
         dataset,
-        "twomoon_decision_region.png",
-        "Two Moons Decision Region",
+        optimizer,
+        epochs,
     )
+    epoch_numbers = range(1, len(loss_history) + 1)
+
+    plt.plot(epoch_numbers, loss_history)
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title(f"Training Loss: {args.dataset} data with {args.model.upper()}")
+    plt.yscale("log")
+    axes = plt.gca()
+    axes.text(
+        0.98,
+        0.98,
+        (
+            f"lr = {experiment['learning_rate']}\n"
+            f"seed = {experiment['random_seed']}\n"
+            f"loss = {loss_history[0]:.4g} → {loss_history[-1]:.4g}"
+        ),
+        transform=axes.transAxes,
+        horizontalalignment="right",
+        verticalalignment="top",
+        bbox={"facecolor": "white", "alpha": 0.8, "edgecolor": "gray"},
+    )
+    loss_curve_path = Path(experiment["loss_curve_filename"])
+    loss_curve_path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(loss_curve_path)
+    plt.close()
+    print(f"Saved loss curve: {loss_curve_path}")
 
     print("Final parameters:")
 
