@@ -1,3 +1,5 @@
+import numpy as np
+
 from ..autograd.tensor import Tensor
 
 
@@ -23,3 +25,14 @@ class Sigmoid:
             raise TypeError("x must be a Tensor")
         out = 1 / ((-x).exp() + 1)
         return out
+
+
+class Softmax:
+    def forward(self, x):
+        if not isinstance(x, Tensor):
+            raise TypeError("x must be a Tensor")
+        row_max_data = np.max(x.data, axis=1, keepdims=True)
+        stable_logits = x - Tensor(row_max_data)
+        exp_logits = stable_logits.exp()
+        probabilities = exp_logits / exp_logits.sum(axis=1, keepdims=True)
+        return probabilities
