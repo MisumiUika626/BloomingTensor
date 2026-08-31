@@ -1,3 +1,5 @@
+"""Prediction-surface visualization for two-dimensional toy experiments."""
+
 import matplotlib.pyplot as plt
 import numpy as np
 

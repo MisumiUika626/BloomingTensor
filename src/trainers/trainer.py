@@ -1,7 +1,9 @@
+"""Per-sample MSE trainer for the original toy experiments."""
+
 from ..autograd.tensor import Tensor
 
 
-class Trainer:
+class ToyTrainer:
     def compute_loss(self, prediction, target):
         squared_error = (target - prediction) ** 2
         return squared_error.mean()
@@ -46,3 +48,7 @@ class Trainer:
             print(f"Epoch {epoch + 1}, Loss: {average_loss}")
 
         return loss_history
+
+
+# Compatibility alias for older notes and external imports.
+Trainer = ToyTrainer

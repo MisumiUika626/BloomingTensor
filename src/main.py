@@ -1,13 +1,15 @@
+"""CLI for the original toy regression and binary-labelled MSE experiments."""
+
 import argparse
 from pathlib import Path
 
 from .autograd.tensor import Tensor
-from .experiments import build_experiment
-from .trainers.trainer import Trainer
+from .experiments import build_toy_experiment
+from .trainers.trainer import ToyTrainer
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Run a Growing-AI experiment")
+    parser = argparse.ArgumentParser(description="Run a toy Growing-AI experiment")
     parser.add_argument(
         "--dataset",
         choices=("linear", "nonlinear", "xor", "twomoon"),
@@ -22,14 +24,14 @@ def main():
 
     import matplotlib.pyplot as plt
 
-    experiment = build_experiment(args.dataset, args.model)
+    experiment = build_toy_experiment(args.dataset, args.model)
 
     dataset = experiment["dataset"]
     model = experiment["model"]
     optimizer = experiment["optimizer"]
     epochs = experiment["epochs"]
 
-    trainer = Trainer()
+    trainer = ToyTrainer()
 
     loss_history = trainer.fit(
         model,

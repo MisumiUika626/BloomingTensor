@@ -16,12 +16,12 @@ Python 更关注对象是否具有需要的行为，而不强制对象必须属�
 常见表述是：如果一个对象走起来像鸭子、叫起来像鸭子，就可以把它当作鸭子使用。
 
 ```python
-class Trainer:
-    def __init__(self, model):
-        self.model = model
+class ToyTrainer:
+    def fit(self, model, dataset, optimizer, epochs):
+        ...
 ```
 
-这里 `Trainer` 不需要导入或检查 `Linear` 类型。只要传入的 `model` 提供 Trainer 所需的属性和方法，就可以协作。
+这里 `ToyTrainer` 不需要导入或检查 `Linear` 类型。只要传入的 `model` 提供训练器所需的属性和方法，就可以协作。MNIST 使用独立的 `ClassificationTrainer`，但同样通过行为接口接收共享的 `MLP`。
 
 ### C++ 类比
 
@@ -38,10 +38,11 @@ class Trainer {
 
 ### 当前项目中的应用
 
-`Trainer` 通过构造函数接收模型：
+`ToyTrainer` 通过 `fit()` 接收模型：
 
 ```python
-trainer = Trainer(model)
+trainer = ToyTrainer()
+trainer.fit(model, dataset, optimizer, epochs)
 ```
 
 因此不需要在 `trainer.py` 中写：
@@ -81,7 +82,8 @@ from .models.linear import Linear
 相对导入需要保留包上下文，应从项目根目录按模块运行：
 
 ```bash
-python3 -m src.main
+python3 -m src.main        # Toy MSE experiments
+python3 -m src.main_mnist  # MNIST classification
 ```
 
 `-m` 表示运行模块。直接执行 `python3 src/main.py` 时，Python 会把它当作独立脚本，无法确定 `.` 所代表的包。

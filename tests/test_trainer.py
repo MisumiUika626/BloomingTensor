@@ -3,12 +3,12 @@ import unittest
 import numpy as np
 
 from src.autograd.tensor import Tensor
-from src.trainers.trainer import Trainer
+from src.trainers.trainer import ToyTrainer
 
 
-class TestTrainer(unittest.TestCase):
+class TestToyTrainer(unittest.TestCase):
     def test_mse_loss(self):
-        trainer = Trainer()
+        trainer = ToyTrainer()
         prediction = Tensor([[2.0], [4.0]])
         target = Tensor([[4.0], [8.0]])
 
@@ -18,7 +18,7 @@ class TestTrainer(unittest.TestCase):
         np.testing.assert_allclose(loss.data, 10.0)
 
     def test_loss_backward(self):
-        trainer = Trainer()
+        trainer = ToyTrainer()
         prediction = Tensor([[2.0], [4.0]])
         target = Tensor([[4.0], [8.0]])
 

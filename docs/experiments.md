@@ -1,6 +1,6 @@
 # Experiments and Showcase Guide
 
-This document separates experiments that are reproducible in the current repository from experiments that are only candidates for future work. The current command-line interface accepts a dataset and model independently:
+This document separates the original toy foundation experiments, the independent MNIST classification track, and future candidates. The toy command-line interface accepts a dataset and model independently:
 
 ```bash
 python3 -m src.main --dataset DATASET --model MODEL
@@ -10,7 +10,7 @@ python3 -m src.main --dataset DATASET --model MODEL
 
 ## What the current runner measures
 
-`Trainer.fit()` performs per-sample SGD. After each epoch it freezes the updated parameters, evaluates MSE over the full training dataset, and appends that average to the loss history. `src.main` plots this history on a logarithmic y-axis and saves it under `plots/`.
+`ToyTrainer.fit()` performs per-sample SGD. After each epoch it freezes the updated parameters, evaluates MSE over the full training dataset, and appends that average to the loss history. `src.main` plots this history on a logarithmic y-axis and saves it under `plots/`.
 
 For XOR and Two Moons, the runner also evaluates the trained model over a two-dimensional grid. It saves the raw prediction surface, training samples, and a black `0.5` inspection boundary as a second timestamped figure.
 
@@ -81,6 +81,34 @@ For each figure or written result, record:
 
 A decreasing training loss shows that the update path improves fit to the training samples. It does not by itself establish robustness, calibrated probabilities, or generalization.
 
+## MNIST classification — implemented separately
+
+The MNIST runner does not pass through the toy experiment builder or `ToyTrainer`:
+
+```bash
+python3 -m src.main_mnist --epochs 2 --train-limit 512 --test-limit 256
+```
+
+The verified small-run contract is:
+
+```text
+images (B,784)
+→ shared MLP [784,128,10]
+→ logits (B,10)
+→ stable CrossEntropy scalar
+→ backward + SGD
+→ held-out test loss and argmax accuracy
+```
+
+On the recorded 512-train/256-test, two-epoch diagnostic run, train loss moved `2.2933 → 2.2563`, test loss moved `2.2881 → 2.2613`, and test accuracy moved `14.45% → 26.95%`. This only verifies that the pipeline learns on a small fixed subset; it is not a full-dataset benchmark.
+
+To view one raw sample without training:
+
+```bash
+MPLCONFIGDIR=/tmp/growing-ai-matplotlib \
+python3 -m src.show_mnist --split train --index 0
+```
+
 ## Candidate experiments — not implemented
 
 These experiments match the current project's learning goals, but they should remain labelled as planned until their datasets, runners, tests, and metrics exist in the repository.
@@ -111,11 +139,12 @@ Run the existing nonlinear, XOR, and Two Moons experiments across several seeds 
 
 ### 5. Multiclass spiral data
 
-A spiral dataset is a useful visual test of nonlinear decision boundaries, but the standard experiment is multiclass. It should follow, not precede, stable multi-class logits, Softmax/CrossEntropy, integer targets, and accuracy. The [CS231n neural-network case study](https://cs231n.github.io/neural-networks-case-study/) is a reference for the data shape and the linear-versus-MLP comparison.
+A spiral dataset is a useful next visual test of nonlinear decision boundaries. The repository now has the necessary multi-class logits, stable CrossEntropy, integer targets, and accuracy contract, but the spiral dataset and visualization are not implemented. The [CS231n neural-network case study](https://cs231n.github.io/neural-networks-case-study/) is a reference for the data shape and the linear-versus-MLP comparison.
 
 ## Recommended order
 
-1. Add finite-difference checks for the current autograd engine.
-2. Add a held-out split and honest evaluation to the existing regression and binary-labelled experiments.
-3. Implement BCE, then add concentric circles as another binary geometry.
-4. Implement and test stable CrossEntropy before attempting multiclass spiral data or MNIST.
+1. Add persisted axis-aware reduction and finite-difference checks for the current autograd engine.
+2. Add MNIST training curves, prediction grids, and a confusion matrix.
+3. Add a held-out split and honest evaluation to the existing regression and binary-labelled toy experiments.
+4. Implement BCE, then add concentric circles as another binary geometry.
+5. Consider multiclass spiral data only after the MNIST classification path remains stable.

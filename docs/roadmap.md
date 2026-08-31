@@ -14,17 +14,20 @@ Transformers → agents → reinforcement learning.
 - Composition-based Sigmoid, MSE training, per-sample SGD, and fixed-parameter epoch evaluation.
 - Reproducible linear, `y = x^2`, XOR, and Two Moons datasets with independently selected Linear/MLP models.
 - A command-line experiment runner that saves timestamped loss curves and two-dimensional prediction surfaces for XOR and Two Moons.
-- Unit tests for current autograd, layer, model, activation, and loss behavior.
+- Axis-aware Tensor reduction, stable row-wise Softmax, stable CrossEntropy, integer-label accuracy, and batch loading.
+- A separate MNIST IDX loader, `[784,128,10]` MLP runner, classification trainer, held-out test evaluation, and sample visualization.
+- Unit tests for current autograd, layer, model, activation, loss, metric, and batch behavior.
 
 ## Current Focus
 
-Finish and verify the axis-aware `Tensor.sum(axis, keepdims)` behavior needed by later batch-wise normalization and loss calculations. Preserve the existing scalar experiments as a regression bench while the multi-class path is developed separately.
+Keep the original toy MSE experiments and the MNIST classification track explicitly separated while adding visible, reproducible evidence to the MNIST path. The shared `Tensor`, `MLP`, and `SGD` core should remain common to both.
 
 ## Next
 
-1. Add focused forward/backward tests for axis-aware reductions, including restored gradient shapes when `keepdims=False`.
-2. Add a binary-classification contract with BCE, explicit threshold accuracy, and a held-out split before presenting XOR or Two Moons as evaluated classifiers.
-3. Verify numerically stable Softmax/CrossEntropy on small synthetic logits before adding a multiclass dataset.
-4. Add centered finite-difference gradient checks for representative Tensor operations and layer parameters.
+1. Persist focused forward/backward tests for axis-aware reductions, including restored gradient shapes when `keepdims=False`.
+2. Add MNIST train/test loss curves, test-accuracy curves, prediction grids, and a confusion matrix.
+3. Run and record a bounded full-data MNIST baseline with its configuration and honest limitations.
+4. Add a binary-classification contract with BCE, explicit threshold accuracy, and a held-out split before presenting XOR or Two Moons as evaluated classifiers.
+5. Add centered finite-difference gradient checks for representative Tensor operations and layer parameters.
 
 Transformer, agent, and reinforcement-learning work remain long-term learning directions, not current repository capabilities.

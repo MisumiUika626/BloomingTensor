@@ -1,3 +1,5 @@
+"""Three-sample dataset for the original linear toy experiment."""
+
 class Dataset:
 
     def __init__(self):

@@ -1,3 +1,5 @@
+"""Assembly for the original toy MSE experiments, not the MNIST track."""
+
 from datetime import datetime
 
 import numpy as np
@@ -7,7 +9,7 @@ from .nn.linear import Linear
 from .optimizers.sgd import SGD
 
 
-def build_experiment(dataset_name, model_name):
+def build_toy_experiment(dataset_name, model_name):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
     if dataset_name == "linear":
@@ -66,3 +68,7 @@ def build_experiment(dataset_name, model_name):
             f"plots/decision_region_{dataset_name}_{model_name}_{timestamp}.png"
         ),
     }
+
+
+# Compatibility alias for older notes and external imports.
+build_experiment = build_toy_experiment

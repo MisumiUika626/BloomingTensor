@@ -1,3 +1,5 @@
+"""Configuration for the three-sample linear toy experiment."""
+
 INPUT_DIM = 3
 OUTPUT_DIM = 1
 HIDDEN_DIMS = [4]
