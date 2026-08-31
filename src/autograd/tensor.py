@@ -122,11 +122,16 @@ class Tensor:
             other = Tensor(other)
         return other * self**-1
 
-    def sum(self):
-        out = Tensor(np.sum(self.data), (self,), "sum")
+    def sum(self, axis=None, keepdims=False):
+        out = Tensor(np.sum(self.data, axis=axis, keepdims=keepdims), (self,), "sum")
 
         def _backward():
-            self.grad += out.grad * np.ones_like(self.data)
+            grad = out.grad
+
+            if axis != None and keepdims == False:
+                grad = np.expand_dims(grad, axis=axis)
+
+            self.grad += grad * np.ones_like(self.data)
 
         out._backward = _backward
         return out
