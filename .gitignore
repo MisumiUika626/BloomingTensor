@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Downloaded datasets
+data/mnist/
+
+# Generated experiment artifacts
+plots/
