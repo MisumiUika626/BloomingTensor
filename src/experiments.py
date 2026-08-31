@@ -62,4 +62,7 @@ def build_experiment(dataset_name, model_name):
         "loss_curve_filename": (
             f"plots/loss_curve_{dataset_name}_{model_name}_{timestamp}.png"
         ),
+        "decision_region_filename": (
+            f"plots/decision_region_{dataset_name}_{model_name}_{timestamp}.png"
+        ),
     }

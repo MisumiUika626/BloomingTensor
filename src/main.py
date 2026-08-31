@@ -64,6 +64,18 @@ def main():
     plt.close()
     print(f"Saved loss curve: {loss_curve_path}")
 
+    if args.dataset in {"xor", "twomoon"}:
+        from .visualization import plot_binary_decision_region
+
+        decision_region_path = Path(experiment["decision_region_filename"])
+        plot_binary_decision_region(
+            model,
+            dataset,
+            decision_region_path,
+            title=f"Prediction Surface: {args.dataset} data with {args.model.upper()}",
+        )
+        print(f"Saved decision region: {decision_region_path}")
+
     print("Final parameters:")
 
     for parameter in model.parameters():
