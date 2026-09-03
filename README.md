@@ -1,6 +1,6 @@
 # BloomingTensor
 
-Growing-AI is a small, NumPy-first learning project for understanding how automatic differentiation and neural-network training work below framework-level APIs. The repository now has two deliberately separate learning tracks built on one shared `Tensor`/`MLP`/`SGD` core:
+BloomingTensor is a small, NumPy-first learning project for understanding how automatic differentiation and neural-network training work below framework-level APIs. The repository now has two deliberately separate learning tracks built on one shared `Tensor`/`MLP`/`SGD` core:
 
 | Track | Data and output | Loss and evaluation | Entry point |
 | --- | --- | --- | --- |
@@ -160,7 +160,7 @@ python3 -m src.main_mnist
 Save one MNIST sample as a PNG:
 
 ```bash
-MPLCONFIGDIR=/tmp/growing-ai-matplotlib \
+MPLCONFIGDIR=/tmp/blooming-tensor-matplotlib \
 python3 -m src.show_mnist --split train --index 0
 ```
 
@@ -219,43 +219,4 @@ The current suite contains 54 `unittest` cases. It checks:
 - Tensor arithmetic, scalar-backward enforcement, and repeatable backward passes;
 - broadcasted addition and multiplication gradients;
 - matrix-multiplication values, gradient values, and gradient shapes;
-- reduction, ReLU, Leaky ReLU, Softmax, exponential, and logarithm behavior;
-- Linear input validation, forward values, backward values, and parameter identity;
-- MLP output shape, parameter collection, and seeded initialization;
-- MSE and CrossEntropy forward/backward behavior;
-- mini-batch boundaries and deterministic shuffling; and
-- multi-class accuracy for correct, partial, and incorrect predictions;
-- classification training updates, evaluation immutability, and history recording.
-
-Run the full suite with:
-
-```bash
-python3 -m unittest discover -s tests -v
-```
-
-## Current limitations
-
-- This is a learning implementation with a small API and no compatibility or performance guarantees.
-- `Tensor.backward()` requires a scalar root; custom upstream gradients are not supported.
-- Matrix multiplication supports only two-dimensional tensors.
-- The toy trainer intentionally remains online and MSE-based; MNIST uses a separate mini-batch classification trainer.
-- BCE is not implemented; XOR and Two Moons remain raw-output MSE demonstrations.
-- Binary-labelled experiments use raw outputs rather than probability-calibrated predictions.
-- Toy experiment reporting is training-set only. MNIST uses its standard held-out test set but has no validation split.
-- There is no model serialization, device abstraction, packaging metadata, or CI configuration.
-- Type hints exist in a few interfaces but are not comprehensive.
-
-## Roadmap
-
-The next steps are deliberately limited to gaps visible in the current code and experiment path:
-
-1. Add focused persisted tests for axis-aware `Tensor.sum()` forward and backward behavior.
-2. Add MNIST training curves, prediction grids, and a confusion matrix without mixing them into the toy visualizations.
-3. Add a properly evaluated binary-classification path with BCE and a held-out split for XOR and Two Moons.
-4. Add finite-difference gradient checks for representative Tensor and layer parameters.
-
-Larger topics in the project's learning direction should be added only after their required tensor operations, losses, interfaces, and tests exist.
-
-## Learning goals
-
-The project favors small, inspectable implementations over broad API coverage. A component is useful here when its mathematical rule, data flow, engineering responsibility, and verification method can all be explained from the repository itself.
+- reduction, ReLU, Leaky ReLU,
