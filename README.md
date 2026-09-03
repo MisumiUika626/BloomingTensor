@@ -1,4 +1,4 @@
-# Growing-AI
+# BloomingTensor
 
 Growing-AI is a small, NumPy-first learning project for understanding how automatic differentiation and neural-network training work below framework-level APIs. The repository now has two deliberately separate learning tracks built on one shared `Tensor`/`MLP`/`SGD` core:
 
